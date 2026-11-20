@@ -10,10 +10,10 @@ Python ile 9:16 (1080x1920) Instagram Reel üretir: animasyonlu sahneler, ses il
 pip install -r requirements.txt
 ```
 
-Yazı tipleri varsayılan olarak `C:/Windows/Fonts` içinden okunur (`segoeuib.ttf`, `segoeui.ttf`, `consola.ttf`). Başka bir sistemde aynı dosya adlarına sahip fontların klasörünü verin:
+Metin fontu `font-roboto` paketinden gelir (Türkçe karakterler dahil), ek bir şey gerekmez. Kod yazısı için sırayla şunlar aranır: `REEL_MONO_FONT` ortam değişkeni, matplotlib'in DejaVu Sans Mono'su, Windows'ta Consolas, Linux'ta DejaVu Sans Mono, macOS'ta Courier New. Hiçbiri yoksa Roboto kullanılır. İstediğiniz monospace fontu vermek için:
 
 ```bash
-export REEL_FONT_DIR=/yol/fontlar
+export REEL_MONO_FONT=/yol/font.ttf
 ```
 
 ## Nasıl çalışır
@@ -57,6 +57,6 @@ Sahne süresi = ses klibi süresi + 0,95 sn. Altyazılar cümle uzunluğuna gör
 
 ## Notlar
 
-- Altyazı ve görsellerdeki Türkçe karakterler Segoe UI ile test edildi.
+- Türkçe karakterler Roboto ile test edildi (ç, ğ, ı, İ, ö, ş, ü).
 - `ffmpeg`, `imageio-ffmpeg` paketiyle birlikte gelir; ayrıca kurmanız gerekmez.
 - Üretilen MP4 ve ses dosyaları `.gitignore` ile repoya girmez.

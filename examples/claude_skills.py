@@ -49,7 +49,7 @@ def sc_bloat(s, t, D):
     s.pop(txt("Claude detayı *sadece gerekince* okur", B, 54, maxw=920), 80, 1310, t, 5.8, .6)
     a = pr(t, 6.4, .5)
     if a > 0:
-        s.put(pill("gerekince → reference.md", AC, 34), 80, 1440, a)
+        s.put(pill("gerekince: reference.md", AC, 34), 80, 1440, a)
 
 def sc_one(s, t, D):
     header(s, t, 3, "HATA 3", "TEK İŞ", "Bir skill = *bir iş*")
@@ -88,7 +88,7 @@ def sc_example(s, t, D):
         s.pop(txt(o, B, 40, FG, maxw=700), 160, 1230+i*105+18, t, 5.4 + i*.5, .45, 30)
 
 def sc_test(s, t, D):
-    header(s, t, 5, "HATA 5", "TEST ETMEMEK", "Yaz → *gerçek istemle dene* → düzelt", 76)
+    header(s, t, 5, "HATA 5", "TEST ETMEMEK", "Yaz, *gerçek istemle dene*, düzelt", 76)
     nodes = [("Yaz", 80), ("Dene", 410), ("Düzelt", 740)]
     for i, (nm, x) in enumerate(nodes):
         st = 1.0 + i*.7; p = back((t-st)/.5)

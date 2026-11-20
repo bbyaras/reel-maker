@@ -6,11 +6,23 @@ from PIL import Image, ImageDraw, ImageFont
 W, H, FPS = 1080, 1920, 30
 FG, MUT, AC = (246,240,231), (158,148,136), (217,119,87)
 OK, BAD, CARD, EDGE, DARK = (111,198,134), (236,100,92), (38,34,30), (66,59,51), (22,19,17)
-FD = os.environ.get("REEL_FONT_DIR", "C:/Windows/Fonts").rstrip("/") + "/"
-B, R, M = "segoeuib.ttf", "segoeui.ttf", "consola.ttf"
+import font_roboto  # pip: font-roboto (Apache-2.0, Türkçe karakter destekli)
+_RD = os.path.join(os.path.dirname(font_roboto.__file__), "files")
+B, R = os.path.join(_RD, "Roboto-Bold.ttf"), os.path.join(_RD, "Roboto-Regular.ttf")
+
+def _find_mono():
+    """Kod yazısı için monospace font: REEL_MONO_FONT, sonra yaygın sistem/paket yolları, yoksa Roboto."""
+    cands = [os.environ.get("REEL_MONO_FONT", "")]
+    try:
+        import matplotlib; cands.append(os.path.join(matplotlib.get_data_path(), "fonts/ttf/DejaVuSansMono.ttf"))
+    except ImportError: pass
+    cands += ["C:/Windows/Fonts/consola.ttf", "/usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf",
+              "/Library/Fonts/Courier New.ttf", "/System/Library/Fonts/Supplemental/Courier New.ttf"]
+    return next((p for p in cands if p and os.path.exists(p)), R)
+M = _find_mono()
 
 @functools.lru_cache(None)
-def font(n, s): return ImageFont.truetype(FD + n, s)
+def font(n, s): return ImageFont.truetype(n, s)
 def clamp(x): return max(0.0, min(1.0, x))
 def ease(x): x = clamp(x); return 1 - (1 - x) ** 3
 def pr(t, s, d=.5): return ease((t - s) / d)
@@ -77,13 +89,17 @@ def disc(d, col, alpha=255):
 def txt(text, fn, size, col=FG, maxw=920, align="left", lh=1.22, acc=AC):
     f = font(fn, size); sp = f.getlength(" "); lines = []
     for raw in text.split("\n"):
-        cur, x, on = [], 0, False
+        cur, x, on, prev = [], 0, False, " "
         for part in raw.split("*"):
+            first = True
             for w in part.split(" "):
                 if not w: continue
+                if first and cur and prev != " " and not part.startswith(" "): x -= sp  # vurgu sınırında boşluk yoksa yapıştır
+                first = False
                 wl = f.getlength(w)
                 if cur and x + wl > maxw: lines.append((cur, x-sp)); cur, x = [], 0
                 cur.append((w, acc if on else col, x)); x += wl + sp
+            if part: prev = part[-1]
             on = not on
         lines.append((cur, x-sp))
     h = int(size*lh); im = Image.new("RGBA", (maxw, h*len(lines)+int(size*.35)), (0,0,0,0)); d = ImageDraw.Draw(im)
