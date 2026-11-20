@@ -60,3 +60,12 @@ Sahne süresi = ses klibi süresi + 0,95 sn. Altyazılar cümle uzunluğuna gör
 - Türkçe karakterler Roboto ile test edildi (ç, ğ, ı, İ, ö, ş, ü).
 - `ffmpeg`, `imageio-ffmpeg` paketiyle birlikte gelir; ayrıca kurmanız gerekmez.
 - Üretilen MP4 ve ses dosyaları `.gitignore` ile repoya girmez.
+
+## Kullanılan projeler
+
+- [Pillow](https://github.com/python-pillow/Pillow): kare çizimi (şekiller, metin, katmanlar)
+- [NumPy](https://github.com/numpy/numpy): arka plan degradesi ve kare verisi
+- [imageio](https://github.com/imageio/imageio) ve [imageio-ffmpeg](https://github.com/imageio/imageio-ffmpeg): video yazma ve ses karıştırma (FFmpeg ikilisini getirir)
+- [fonts-python / font-roboto](https://github.com/pimoroni/fonts-python): Roboto yazı tipi paketi (Apache-2.0)
+
+Seslendirme için ElevenLabs veya VidIQ gibi bir servis kullanılabilir; bunlar repoya dahil değildir, anlatım MP3'ünü siz sağlarsınız.
