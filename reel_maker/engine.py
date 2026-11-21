@@ -1,5 +1,5 @@
 """Reel motoru: ortak çizim yardımcıları + Reel sınıfı (önizleme, render, ses karıştırma)."""
-import sys, math, re, subprocess, functools, os
+import sys, math, re, subprocess, functools, os, json
 import numpy as np, imageio.v2 as imageio, imageio_ffmpeg
 from PIL import Image, ImageDraw, ImageFont
 
@@ -188,14 +188,26 @@ class Reel:
         self.clips = [os.path.join(ses_dir, f"s{i}.mp3") for i in range(self.n)]
         self.aud = [mp3_dur(p) if os.path.exists(p) else sum(len(x) for x in sn)/cps
                     for p, (_, sn) in zip(self.clips, scenes)]
+        capf = os.path.join(ses_dir, "captions.json")  # tools/split_audio.py çıktısı: cümle zamanları
+        self.caps = json.load(open(capf)) if os.path.exists(capf) else None
         self.durs = [a + lead + tail for a in self.aud]
         self.starts = [sum(self.durs[:i]) for i in range(self.n)]
         self.total = sum(self.durs)
 
+    def cues(self, i):
+        """i. sahnenin cümle başlangıçları (sahne saniyesi). Sahne fonksiyonları animasyonu bunlara bağlayabilir: s.cues[k]."""
+        sents = self.scenes[i][1]; tot = sum(len(x) for x in sents); acc = 0; out = []
+        for k, sn in enumerate(sents):
+            out.append(self.lead + (self.caps[i][k][0] if self.caps else self.aud[i]*acc/tot)); acc += len(sn)
+        return out
+
     def caption(self, s, t, i):
         sents = self.scenes[i][1]; tot = sum(len(x) for x in sents); acc = 0
-        for sn in sents:
-            st = self.lead + self.aud[i]*acc/tot; en = self.lead + self.aud[i]*(acc+len(sn))/tot; acc += len(sn)
+        for k, sn in enumerate(sents):
+            if self.caps:  # ölçülmüş cümle zamanları
+                st, en = self.lead + self.caps[i][k][0], self.lead + self.caps[i][k][1]
+            else:  # tahmin: karakter oranı
+                st = self.lead + self.aud[i]*acc/tot; en = self.lead + self.aud[i]*(acc+len(sn))/tot; acc += len(sn)
             if st-.05 <= t < en+.05:
                 im = txt(sn, B, 58, FG, 860, "center", 1.2)
                 h = im.height + 60
@@ -208,7 +220,7 @@ class Reel:
         gx = 540 - 750 + 80*math.sin(gt*.35); gy = 250 + 60*math.cos(gt*.28)
         fr.paste(GLOWC, (int(gx), int(gy)), GLOW)
         D = self.durs[i]; ga = 1 - ease((t-(D-.35))/.35)
-        s = S(fr, ga)
+        s = S(fr, ga); s.cues = self.cues(i)
         self.scenes[i][0](s, t, D)
         self.caption(s, t, i)
         d = ImageDraw.Draw(fr); seg = (920 - (self.n-1)*10)/self.n
